@@ -48,8 +48,8 @@ spring:
     name: auth-service
   datasource:
     url: jdbc:postgresql://localhost:5432/auth_db
-    username: <usuario>
-    password: <contraseña>
+    username: postgres
+    password: postgresql
   jpa:
     hibernate:
       ddl-auto: create   # usar 'create' solo en desarrollo inicial
