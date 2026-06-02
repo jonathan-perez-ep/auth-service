@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.web.SecurityFilterChain;
@@ -40,13 +41,18 @@ import java.util.UUID;
 public class AuthorizationServerConfig {
 
     // Activa los endpoints OAuth2 (/oauth2/token, /oauth2/authorize, etc.).
-    // Si el navegador intenta acceder sin sesión, lo manda al formulario de login.
+    // Solo intercepta rutas propias del AS; el resto lo atiende defaultSecurityFilterChain.
+    // Si el navegador llega sin sesión, lo redirige al formulario de login.
     @Bean
     @Order(1)
     SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.oauth2AuthorizationServer(configurer ->
-                configurer.oidc(Customizer.withDefaults()));
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+                new OAuth2AuthorizationServerConfigurer();
+
         http
+                .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+                .with(authorizationServerConfigurer, configurer ->
+                        configurer.oidc(Customizer.withDefaults()))
                 .exceptionHandling(e -> e
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
