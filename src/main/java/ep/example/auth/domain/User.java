@@ -29,5 +29,5 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private UserRoleEnum role = UserRoleEnum.ROLE_USER;
+    private UserRoleEnum role = UserRoleEnum.USER;
 }

@@ -1,6 +1,7 @@
 package ep.example.auth.domain;
 
+// Sin prefijo ROLE_ — Spring Security lo agrega automáticamente en hasRole("ADMIN")
 public enum UserRoleEnum {
-    ROLE_USER,
-    ROLE_ADMIN
+    USER,
+    ADMIN
 }
