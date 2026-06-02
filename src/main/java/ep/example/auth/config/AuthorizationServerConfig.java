@@ -53,6 +53,7 @@ public class AuthorizationServerConfig {
                 .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
                 .with(authorizationServerConfigurer, configurer ->
                         configurer.oidc(Customizer.withDefaults()))
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
@@ -81,7 +82,10 @@ public class AuthorizationServerConfig {
                     .scope(OidcScopes.OPENID)
                     .scope(OidcScopes.PROFILE)
                     .scope("read")
-                    .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                    .clientSettings(ClientSettings.builder()
+                            .requireAuthorizationConsent(true)
+                            .requireProofKey(false)
+                            .build())
                     .build();
             repository.save(demoClient);
         }
