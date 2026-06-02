@@ -25,8 +25,9 @@ public class User {
     @Builder.Default
     private boolean enabled = true;
 
-    // Rol del usuario: ROLE_USER, ROLE_ADMIN, etc.
+    // Enum evita valores arbitrarios — la BD y JPA rechazan cualquier valor fuera de UserRoleEnum
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private String role = "ROLE_USER";
+    private UserRoleEnum role = UserRoleEnum.ROLE_USER;
 }
