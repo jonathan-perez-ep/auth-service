@@ -24,4 +24,9 @@ public class User {
 
     @Builder.Default
     private boolean enabled = true;
+
+    // Rol del usuario: ROLE_USER, ROLE_ADMIN, etc.
+    @Column(nullable = false)
+    @Builder.Default
+    private String role = "ROLE_USER";
 }
