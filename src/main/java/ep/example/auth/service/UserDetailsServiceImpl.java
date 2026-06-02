@@ -1,5 +1,6 @@
 package ep.example.auth.service;
 
+import ep.example.auth.domain.UserRoleEnum;
 import ep.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
@@ -23,7 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .disabled(!user.isEnabled())
-                .authorities("ROLE_" + user.getRole().name())
+                .authorities("ROLE_" + (user.getRole() != null ? user.getRole() : UserRoleEnum.USER).name())
                 .build();
     }
 }
