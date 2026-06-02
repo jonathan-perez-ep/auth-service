@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/auth_db_test
+    username: postgres
+    password: postgresql
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    "[org.springframework.security]": WARN
+    "[ep.example.auth]": INFO

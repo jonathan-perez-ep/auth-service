@@ -65,10 +65,14 @@ src/main/java/ep/example/auth/
 ├── AuthServiceApplication.java
 ├── config/
 │   ├── AuthorizationServerConfig.java  # endpoints OAuth2, clientes, llaves RSA
-│   └── SecurityConfig.java             # login, protección general, usuarios
-├── domain/          # Entidades JPA (pendiente: User)
-├── repository/      # Repositorios JPA (pendiente)
-└── service/         # UserDetailsService con BD (pendiente)
+│   ├── SecurityConfig.java             # login, protección general, usuarios
+│   └── DataInitializer.java            # inserta usuario de prueba al arrancar
+├── domain/
+│   └── User.java                       # entidad JPA de usuarios
+├── repository/
+│   └── UserRepository.java             # consulta usuarios por username
+└── service/
+    └── UserDetailsServiceImpl.java     # autentica usuarios desde PostgreSQL
 ```
 
 ## Endpoints OAuth2
@@ -99,8 +103,23 @@ http.oauth2AuthorizationServer(configurer -> configurer.oidc(...))
 http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
 ```
 
+## Tests
+
+BD de tests separada: `auth_db_test` (PostgreSQL local). Configuración en `src/test/resources/application-test.yaml`.
+
+```bash
+# Correr todos los tests
+.\mvnw.cmd test
+
+# Correr solo los tests de integración del AS
+.\mvnw.cmd test -Dtest=AuthorizationServerIntegrationTest
+```
+
+Los tests usan `ddl-auto: create-drop` — crean las tablas al iniciar y las eliminan al terminar.
+
+Usuario de prueba disponible en `auth_db`: `user` / `password` (creado por `DataInitializer` al arrancar).
+
 ## Notas generales
 
 - Sin herramienta de migración SQL (Flyway/Liquibase) — agregar antes de producción.
 - Las llaves RSA se generan en memoria al arrancar — los tokens emitidos se invalidan al reiniciar. En producción deben persistirse.
-- `UserDetailsService` actual es in-memory (usuario `user` / `password`). Pendiente migrar a BD en Parte 4.
