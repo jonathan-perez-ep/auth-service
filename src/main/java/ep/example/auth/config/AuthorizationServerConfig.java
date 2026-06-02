@@ -95,7 +95,11 @@ public class AuthorizationServerConfig {
                             .requireProofKey(false)
                             .build())
                     .build();
-            repository.save(demoClient);
+            try {
+                repository.save(demoClient);
+            } catch (org.springframework.dao.DuplicateKeyException ignored) {
+                // Otra instancia ya insertó el cliente — no es un error
+            }
         }
 
         return repository;
