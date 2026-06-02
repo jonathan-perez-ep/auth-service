@@ -5,8 +5,8 @@ Servidor de autorización OAuth2 que emite tokens JWT. Construido sobre Spring A
 ## Stack
 
 - Java 17
-- Spring Boot 4.0.6
-- Spring Security + Spring Authorization Server
+- Spring Boot 4.0.6 (Spring Security 7.0.5, Spring Framework 7.0.7)
+- Spring Authorization Server (incluido en `spring-security-config` desde Spring Security 7.x)
 - Spring Data JPA + PostgreSQL
 - Lombok
 - Maven (wrapper incluido)
@@ -40,62 +40,67 @@ En Windows usar `mvnw.cmd` en lugar de `./mvnw`.
 
 Archivo principal: `src/main/resources/application.yaml`
 
-Propiedades mínimas para levantar la aplicación:
-
-```yaml
-spring:
-  application:
-    name: auth-service
-  datasource:
-    url: jdbc:postgresql://localhost:5432/auth_db
-    username: postgres
-    password: postgresql
-  jpa:
-    hibernate:
-      ddl-auto: create   # usar 'create' solo en desarrollo inicial
-    show-sql: false
-```
+La aplicación levanta en `http://localhost:9000`. El discovery document está disponible en:
+`http://localhost:9000/.well-known/openid-configuration`
 
 ## Base de datos
 
-PostgreSQL. Spring Authorization Server requiere las siguientes tablas (definidas en `oauth2-authorization-schema.sql` incluido en la dependencia):
+PostgreSQL local (`auth_db`). Las tablas se crean automáticamente al arrancar:
 
-- `oauth2_registered_client`
-- `oauth2_authorization`
-- `oauth2_authorization_consent`
+- Tablas JPA (`users`, etc.) → creadas por Hibernate via `ddl-auto`
+- Tablas OAuth2 → creadas por `schema.sql` via `spring.sql.init`
 
-Ejecutar los scripts del jar de Spring Authorization Server antes del primer arranque, o usar `ddl-auto: create` temporalmente.
+| Tabla | Propósito |
+|---|---|
+| `oauth2_registered_client` | Apps autorizadas a pedir tokens |
+| `oauth2_authorization` | Historial de tokens emitidos |
+| `oauth2_authorization_consent` | Consentimientos aprobados por usuarios |
 
-## Endpoints OAuth2 (rutas por defecto)
+Al arrancar se inserta automáticamente el cliente `demo-client` si no existe.
+
+## Estructura del proyecto
+
+```
+src/main/java/ep/example/auth/
+├── AuthServiceApplication.java
+├── config/
+│   ├── AuthorizationServerConfig.java  # endpoints OAuth2, clientes, llaves RSA
+│   └── SecurityConfig.java             # login, protección general, usuarios
+├── domain/          # Entidades JPA (pendiente: User)
+├── repository/      # Repositorios JPA (pendiente)
+└── service/         # UserDetailsService con BD (pendiente)
+```
+
+## Endpoints OAuth2
 
 | Endpoint | Ruta |
 |---|---|
 | Autorización | `/oauth2/authorize` |
 | Token | `/oauth2/token` |
-| Introspección de token | `/oauth2/introspect` |
-| Revocación de token | `/oauth2/revoke` |
+| Introspección | `/oauth2/introspect` |
+| Revocación | `/oauth2/revoke` |
 | JWK Set | `/oauth2/jwks` |
 | OIDC UserInfo | `/userinfo` |
 | OIDC Discovery | `/.well-known/openid-configuration` |
 
-## Estructura del proyecto (planificada)
+## Notas importantes — Spring Security 7.x
 
+En Spring Security 7.x los paquetes del Authorization Server cambiaron respecto a versiones anteriores:
+
+```java
+// Configurer (antes estaba en spring-security-oauth2-authorization-server)
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+
+// Nuevo DSL en HttpSecurity
+http.oauth2AuthorizationServer(configurer -> configurer.oidc(...))
+
+// securityMatcher obligatorio — Spring Security 7 lanza excepción si dos cadenas
+// de filtros interceptan "any request". Siempre restringir la cadena del AS:
+http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
 ```
-src/main/java/ep/example/auth/
-├── AuthServiceApplication.java
-├── config/          # SecurityConfig, AuthorizationServerConfig, JpaConfig
-├── domain/          # Entidades User, Role
-├── repository/      # Repositorios JPA
-├── service/         # Implementación de UserDetailsService
-└── web/             # Endpoints personalizados si se necesitan
-```
 
-## Testing
+## Notas generales
 
-Las dependencias de test incluyen `spring-security-test`, `spring-boot-starter-test` y el slice de test para resource server OAuth2. Los tests viven en `src/test/java/ep/example/auth/`.
-
-## Notas
-
-- Sin archivos Docker aún — ejecutar PostgreSQL localmente o con un `docker-compose.yml` aparte.
-- Sin herramienta de migración SQL (Flyway/Liquibase) configurada; agregar una antes de ir a producción.
-- Lombok está configurado vía annotation processor en `maven-compiler-plugin` — no requiere plugin del IDE para compilar, pero sí para editar cómodamente.
+- Sin herramienta de migración SQL (Flyway/Liquibase) — agregar antes de producción.
+- Las llaves RSA se generan en memoria al arrancar — los tokens emitidos se invalidan al reiniciar. En producción deben persistirse.
+- `UserDetailsService` actual es in-memory (usuario `user` / `password`). Pendiente migrar a BD en Parte 4.
