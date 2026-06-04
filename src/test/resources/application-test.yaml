@@ -1,17 +1,13 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/auth_db_test
-    username: postgres
-    password: postgresql
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/auth_db_test
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     show-sql: false
-
-  sql:
-    init:
-      mode: always
 
 logging:
   level:
