@@ -8,6 +8,7 @@ Servidor de autorización OAuth2 que emite tokens JWT. Construido sobre Spring A
 - Spring Boot 4.0.6 (Spring Security 7.0.5, Spring Framework 7.0.7)
 - Spring Authorization Server (incluido en `spring-security-config` desde Spring Security 7.x)
 - Spring Data JPA + PostgreSQL
+- Flyway 11.x (configurado manualmente — Spring Boot 4.x no incluye auto-configuración)
 - Lombok
 - Maven (wrapper incluido)
 
@@ -45,18 +46,36 @@ La aplicación levanta en `http://localhost:9000`. El discovery document está d
 
 ## Base de datos
 
-PostgreSQL local (`auth_db`). Las tablas se crean automáticamente al arrancar:
+PostgreSQL local (`auth_db`). Las tablas las crea Flyway al arrancar desde `src/main/resources/db/migration/`.
 
-- Tablas JPA (`users`, etc.) → creadas por Hibernate via `ddl-auto`
-- Tablas OAuth2 → creadas por `schema.sql` via `spring.sql.init`
+| Migración | Contenido |
+|---|---|
+| `V1__crear_tablas_oauth2.sql` | Tablas OAuth2 del Authorization Server |
+| `V2__crear_tabla_users.sql` | Tabla de usuarios del sistema |
 
 | Tabla | Propósito |
 |---|---|
 | `oauth2_registered_client` | Apps autorizadas a pedir tokens |
 | `oauth2_authorization` | Historial de tokens emitidos |
 | `oauth2_authorization_consent` | Consentimientos aprobados por usuarios |
+| `users` | Usuarios del sistema |
+| `flyway_schema_history` | Historial de migraciones aplicadas |
 
 Al arrancar se inserta automáticamente el cliente `demo-client` si no existe.
+
+## Variables de entorno
+
+Copiar `.env.example` como `.env` y completar los valores. El `.env` nunca se sube al repositorio.
+
+| Variable | Obligatoria | Descripción |
+|---|---|---|
+| `DB_USERNAME` | Sí | Usuario de PostgreSQL |
+| `DB_PASSWORD` | Sí | Contraseña de PostgreSQL |
+| `DB_HOST` | No (default: localhost) | Host de PostgreSQL |
+| `DB_PORT` | No (default: 5432) | Puerto de PostgreSQL |
+| `DB_NAME` | No (default: auth_db) | Nombre de la BD |
+| `ISSUER_URI` | No (default: http://localhost:9000) | URL base del AS |
+| `SERVER_PORT` | No (default: 9000) | Puerto del servidor |
 
 ## Estructura del proyecto
 
@@ -66,13 +85,21 @@ src/main/java/ep/example/auth/
 ├── config/
 │   ├── AuthorizationServerConfig.java  # endpoints OAuth2, clientes, llaves RSA
 │   ├── SecurityConfig.java             # login, protección general, usuarios
+│   ├── FlywayConfig.java               # configuración manual de Flyway
 │   └── DataInitializer.java            # inserta usuario de prueba al arrancar
 ├── domain/
-│   └── User.java                       # entidad JPA de usuarios
+│   ├── User.java                       # entidad JPA de usuarios
+│   └── UserRoleEnum.java               # roles: USER, ADMIN
 ├── repository/
 │   └── UserRepository.java             # consulta usuarios por username
 └── service/
     └── UserDetailsServiceImpl.java     # autentica usuarios desde PostgreSQL
+
+src/main/resources/
+├── application.yaml                    # configuración principal
+└── db/migration/
+    ├── V1__crear_tablas_oauth2.sql
+    └── V2__crear_tabla_users.sql
 ```
 
 ## Endpoints OAuth2
@@ -115,11 +142,12 @@ BD de tests separada: `auth_db_test` (PostgreSQL local). Configuración en `src/
 .\mvnw.cmd test -Dtest=AuthorizationServerIntegrationTest
 ```
 
-Los tests usan `ddl-auto: create-drop` — crean las tablas al iniciar y las eliminan al terminar.
+Los tests usan `ddl-auto: none` — Flyway crea las tablas al iniciar el contexto de test.
 
 Usuario de prueba disponible en `auth_db`: `user` / `password` (creado por `DataInitializer` al arrancar).
 
 ## Notas generales
 
-- Sin herramienta de migración SQL (Flyway/Liquibase) — agregar antes de producción.
 - Las llaves RSA se generan en memoria al arrancar — los tokens emitidos se invalidan al reiniciar. En producción deben persistirse.
+- Flyway no tiene auto-configuración en Spring Boot 4.x — ver `FlywayConfig.java` y el `@DependsOn("flyway")` en `AuthorizationServerConfig`.
+- Sin Docker aún — próxima fase.
