@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -73,7 +74,9 @@ public class AuthorizationServerConfig {
     }
 
     // El "directorio" de clientes autorizados. Persiste en BD y registra el cliente demo al arrancar.
+    // @DependsOn garantiza que Flyway crea las tablas antes de que este bean las consulte.
     @Bean
+    @DependsOn("flyway")
     RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate,
                                                           PasswordEncoder passwordEncoder) {
         JdbcRegisteredClientRepository repository = new JdbcRegisteredClientRepository(jdbcTemplate);
