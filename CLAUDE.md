@@ -113,8 +113,44 @@ src/main/java/ep/example/auth/
 src/main/resources/
 ├── application.yaml
 └── db/migration/
-    └── V{n}__{descripcion}.sql  # ver historial: SELECT * FROM flyway_schema_history
+    └── V{YYYYMMDDHHMMSS}__{descripcion}.sql  # formato timestamp — ver historial: SELECT * FROM flyway_schema_history
 ```
+
+## Convenciones del proyecto
+
+### Arquitectura
+
+- Paquetes organizados por feature: `features/auth/{nombre-feature}/`
+- Nombres de features en infinitivo o sustantivo corto: `register`, `confirm`, `password-reset`
+- Cada feature contiene solo sus propias clases — sin interfaces para Services
+- DTOs de entrada nombrados `{Feature}Request`, de salida `{Feature}Response`
+- Repositorios JPA en `infrastructure/` solo con métodos estándar de Spring Data
+- Utilidades compartidas entre features en `shared/`
+
+### Commits
+
+- Idioma: siempre en español
+- Formato: `tipo: descripción` (minúsculas, sin punto final, máx. 70 caracteres)
+- Tipos: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `style`
+
+### Tests
+
+- Services → tests unitarios con Mockito (`{Class}Test.java`)
+- Controllers → tests de integración con MockMvc (`{Class}IntegrationTest.java`)
+- Nombres de métodos en inglés: `methodName_withCondition_expectedBehavior()`
+- NO `@Transactional` en tests de integración — usar `@BeforeEach` para limpiar datos
+- Borrar primero tablas hijas (FK) y luego tablas padre en el cleanup
+
+## Skills disponibles
+
+Skills propios en `.claude/skills/`. Invocar con `/nombre-skill`.
+
+| Skill | Descripción |
+|---|---|
+| `/generate-tests` | Genera tests unitarios (Service) o de integración (Controller) |
+| `/new-feature` | Scaffold completo: Controller + Service + Request DTO + migración opcional |
+| `/new-migration` | Crea migración Flyway con timestamp correcto y estilo SQL del proyecto |
+| `/commit` | Genera mensaje de commit en español, propone y ejecuta con push opcional |
 
 ## Endpoints OAuth2
 
