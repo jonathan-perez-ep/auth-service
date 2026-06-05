@@ -30,7 +30,7 @@ class ConfirmServiceTest {
     private ConfirmService confirmService;
 
     @Test
-    void confirmAccount_tokenValido_activaCuenta() {
+    void confirmAccount_withValidToken_activatesAccount() {
         User usuario = User.builder()
                 .id(1L)
                 .username("usuario")
@@ -60,7 +60,7 @@ class ConfirmServiceTest {
     }
 
     @Test
-    void confirmAccount_tokenInvalido_lanzaIllegalArgumentException() {
+    void confirmAccount_withInvalidToken_throwsIllegalArgumentException() {
         when(confirmationTokenRepository.findByToken("token-inexistente")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> confirmService.confirmAccount("token-inexistente"))
@@ -72,7 +72,7 @@ class ConfirmServiceTest {
     }
 
     @Test
-    void confirmAccount_tokenExpirado_lanzaIllegalArgumentException() {
+    void confirmAccount_withExpiredToken_throwsIllegalArgumentException() {
         User usuario = User.builder()
                 .id(2L)
                 .username("usuario")
@@ -98,7 +98,7 @@ class ConfirmServiceTest {
     }
 
     @Test
-    void confirmAccount_tokenYaUtilizado_lanzaIllegalArgumentException() {
+    void confirmAccount_withAlreadyUsedToken_throwsIllegalArgumentException() {
         User usuario = User.builder()
                 .id(3L)
                 .username("usuario")

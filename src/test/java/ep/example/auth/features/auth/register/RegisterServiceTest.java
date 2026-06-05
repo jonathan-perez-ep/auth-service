@@ -39,7 +39,7 @@ class RegisterServiceTest {
     private RegisterService registerService;
 
     @Test
-    void register_usuarioValido_guardaUsuarioYEnviaEmail() {
+    void register_withValidUser_savesUserAndSendsEmail() {
         RegisterRequest request = new RegisterRequest("nuevoUsuario", "nuevo@email.com", "password123");
 
         when(userRepository.existsByUsername("nuevoUsuario")).thenReturn(false);
@@ -55,7 +55,7 @@ class RegisterServiceTest {
     }
 
     @Test
-    void register_usernameExistente_lanzaIllegalArgumentException() {
+    void register_withExistingUsername_throwsIllegalArgumentException() {
         RegisterRequest request = new RegisterRequest("usuarioExistente", "otro@email.com", "password123");
 
         when(userRepository.existsByUsername("usuarioExistente")).thenReturn(true);
@@ -70,7 +70,7 @@ class RegisterServiceTest {
     }
 
     @Test
-    void register_emailExistente_lanzaIllegalArgumentException() {
+    void register_withExistingEmail_throwsIllegalArgumentException() {
         RegisterRequest request = new RegisterRequest("otroUsuario", "emailExistente@email.com", "password123");
 
         when(userRepository.existsByUsername("otroUsuario")).thenReturn(false);
@@ -86,7 +86,7 @@ class RegisterServiceTest {
     }
 
     @Test
-    void register_usuarioValido_passwordEncriptado() {
+    void register_withValidUser_encodesPassword() {
         RegisterRequest request = new RegisterRequest("nuevoUsuario", "nuevo@email.com", "miPasswordSegura");
 
         when(userRepository.existsByUsername("nuevoUsuario")).thenReturn(false);

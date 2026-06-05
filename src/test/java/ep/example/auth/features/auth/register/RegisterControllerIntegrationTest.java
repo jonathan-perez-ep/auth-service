@@ -39,7 +39,7 @@ class RegisterControllerIntegrationTest {
     }
 
     @Test
-    void register_conDatosValidos_retorna201() throws Exception {
+    void register_withValidData_returns201() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -54,7 +54,7 @@ class RegisterControllerIntegrationTest {
     }
 
     @Test
-    void register_conEmailInvalido_retorna400() throws Exception {
+    void register_withInvalidEmail_returns400() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -68,7 +68,7 @@ class RegisterControllerIntegrationTest {
     }
 
     @Test
-    void register_sinPassword_retorna400() throws Exception {
+    void register_withoutPassword_returns400() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -81,7 +81,7 @@ class RegisterControllerIntegrationTest {
     }
 
     @Test
-    void register_passwordMuyCorto_retorna400() throws Exception {
+    void register_withShortPassword_returns400() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -95,7 +95,7 @@ class RegisterControllerIntegrationTest {
     }
 
     @Test
-    void register_usernameYaExiste_retorna409() throws Exception {
+    void register_withExistingUsername_returns409() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
