@@ -1,0 +1,2 @@
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email varchar(255) UNIQUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS account_confirmed boolean NOT NULL DEFAULT false;
