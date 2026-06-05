@@ -9,6 +9,7 @@ Servidor de autorización OAuth2 que emite tokens JWT. Construido sobre Spring A
 - Spring Authorization Server (incluido en `spring-security-config` desde Spring Security 7.x)
 - Spring Data JPA + PostgreSQL
 - Flyway 11.x (configurado manualmente — Spring Boot 4.x no incluye auto-configuración)
+- Spring Mail + Mailtrap (sandbox para desarrollo)
 - Lombok
 - Maven (wrapper incluido)
 
@@ -48,17 +49,13 @@ La aplicación levanta en `http://localhost:9000`. El discovery document está d
 
 PostgreSQL local (`auth_db`). Las tablas las crea Flyway al arrancar desde `src/main/resources/db/migration/`.
 
-| Migración | Contenido |
-|---|---|
-| `V1__crear_tablas_oauth2.sql` | Tablas OAuth2 del Authorization Server |
-| `V2__crear_tabla_users.sql` | Tabla de usuarios del sistema |
-
 | Tabla | Propósito |
 |---|---|
 | `oauth2_registered_client` | Apps autorizadas a pedir tokens |
 | `oauth2_authorization` | Historial de tokens emitidos |
 | `oauth2_authorization_consent` | Consentimientos aprobados por usuarios |
 | `users` | Usuarios del sistema |
+| `confirmation_tokens` | Tokens para confirmación de cuenta |
 | `flyway_schema_history` | Historial de migraciones aplicadas |
 
 Al arrancar se inserta automáticamente el cliente `demo-client` si no existe.
@@ -76,30 +73,47 @@ Copiar `.env.example` como `.env` y completar los valores. El `.env` nunca se su
 | `DB_NAME` | No (default: auth_db) | Nombre de la BD |
 | `ISSUER_URI` | No (default: http://localhost:9000) | URL base del AS |
 | `SERVER_PORT` | No (default: 9000) | Puerto del servidor |
+| `MAIL_USERNAME` | Sí | Usuario SMTP (Mailtrap en dev) |
+| `MAIL_PASSWORD` | Sí | Contraseña SMTP |
+| `MAIL_HOST` | No (default: sandbox.smtp.mailtrap.io) | Host SMTP |
+| `MAIL_PORT` | No (default: 2525) | Puerto SMTP |
+| `MAIL_FROM` | No (default: noreply@auth-service.com) | Remitente de emails |
 
 ## Estructura del proyecto
 
 ```
 src/main/java/ep/example/auth/
 ├── AuthServiceApplication.java
-├── config/
+├── config/                              # configuraciones globales Spring
 │   ├── AuthorizationServerConfig.java  # endpoints OAuth2, clientes, llaves RSA
-│   ├── SecurityConfig.java             # login, protección general, usuarios
+│   ├── SecurityConfig.java             # seguridad HTTP, CSRF, rutas públicas
 │   ├── FlywayConfig.java               # configuración manual de Flyway
-│   └── DataInitializer.java            # inserta usuario de prueba al arrancar
-├── domain/
-│   ├── User.java                       # entidad JPA de usuarios
-│   └── UserRoleEnum.java               # roles: USER, ADMIN
-├── repository/
-│   └── UserRepository.java             # consulta usuarios por username
-└── service/
-    └── UserDetailsServiceImpl.java     # autentica usuarios desde PostgreSQL
+│   ├── DataInitializer.java            # inserta usuario de prueba al arrancar
+│   └── UserDetailsServiceImpl.java     # carga usuarios para autenticación
+├── domain/                              # entidades JPA
+│   ├── User.java
+│   ├── UserRoleEnum.java               # roles: USER, ADMIN
+│   └── ConfirmationToken.java
+├── infrastructure/                      # repositorios JPA base (solo métodos estándar)
+│   ├── UserRepository.java
+│   └── ConfirmationTokenRepository.java
+├── features/                            # features de negocio
+│   └── auth/
+│       ├── register/                    # POST /auth/register
+│       │   ├── RegisterController.java
+│       │   ├── RegisterRequest.java
+│       │   └── RegisterService.java
+│       └── confirm/                     # GET /auth/confirm
+│           ├── ConfirmController.java
+│           └── ConfirmService.java
+└── shared/                              # utilidades compartidas entre features
+    └── email/
+        └── EmailService.java
 
 src/main/resources/
-├── application.yaml                    # configuración principal
+├── application.yaml
 └── db/migration/
-    ├── V1__crear_tablas_oauth2.sql
-    └── V2__crear_tabla_users.sql
+    └── V{n}__{descripcion}.sql  # ver historial: SELECT * FROM flyway_schema_history
 ```
 
 ## Endpoints OAuth2
@@ -113,6 +127,13 @@ src/main/resources/
 | JWK Set | `/oauth2/jwks` |
 | OIDC UserInfo | `/userinfo` |
 | OIDC Discovery | `/.well-known/openid-configuration` |
+
+## Endpoints de la aplicación
+
+| Endpoint | Método | Acceso | Descripción |
+|---|---|---|---|
+| `/auth/register` | POST | Público | Registro de nuevos usuarios |
+| `/auth/confirm` | GET | Público | Confirmación de cuenta por token |
 
 ## Notas importantes — Spring Security 7.x
 
@@ -128,6 +149,9 @@ http.oauth2AuthorizationServer(configurer -> configurer.oidc(...))
 // securityMatcher obligatorio — Spring Security 7 lanza excepción si dos cadenas
 // de filtros interceptan "any request". Siempre restringir la cadena del AS:
 http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+
+// CSRF deshabilitado para endpoints REST /auth/**
+http.csrf(csrf -> csrf.ignoringRequestMatchers("/auth/**"))
 ```
 
 ## Tests
@@ -152,3 +176,4 @@ Usuario de prueba disponible en `auth_db`: `user` / `password` (creado por `Data
 - Flyway no tiene auto-configuración en Spring Boot 4.x — ver `FlywayConfig.java` y el `@DependsOn("flyway")` en `AuthorizationServerConfig`.
 - Docker: `Dockerfile` (multi-stage build) + `docker-compose.yml` (solo PostgreSQL para devs sin instalación local). El backend se corre desde VS Code contra el postgres local o el containerizado.
 - Para levantar solo postgres: `docker compose up -d`
+- Usuarios no confirmados (`enabled=false`) son rechazados por Spring Security con `DisabledException`.
