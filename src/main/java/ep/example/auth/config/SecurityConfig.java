@@ -15,12 +15,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // Regla general: cualquier ruta requiere login. Activa el formulario /login por defecto.
+    // Regla general: registro y confirmación son públicos, el resto requiere login.
     @Bean
     @Order(2)
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/register", "/auth/confirm").permitAll()
+                        .anyRequest().authenticated()
+                )
                 .formLogin(Customizer.withDefaults());
         return http.build();
     }

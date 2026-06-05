@@ -1,7 +1,7 @@
 package ep.example.auth.config;
 
 import ep.example.auth.domain.User;
-import ep.example.auth.repository.UserRepository;
+import ep.example.auth.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
