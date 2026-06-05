@@ -6,13 +6,13 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "confirmation_tokens")
+@Table(name = "account_confirmation_tokens")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ConfirmationToken {
+public class AccountConfirmationToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

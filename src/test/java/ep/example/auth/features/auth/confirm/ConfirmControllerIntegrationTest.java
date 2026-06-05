@@ -1,9 +1,9 @@
 package ep.example.auth.features.auth.confirm;
 
-import ep.example.auth.domain.ConfirmationToken;
+import ep.example.auth.domain.AccountConfirmationToken;
 import ep.example.auth.domain.User;
 import ep.example.auth.domain.UserRoleEnum;
-import ep.example.auth.infrastructure.ConfirmationTokenRepository;
+import ep.example.auth.infrastructure.AccountConfirmationTokenRepository;
 import ep.example.auth.infrastructure.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class ConfirmControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private AccountConfirmationTokenRepository confirmationTokenRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -60,7 +60,7 @@ class ConfirmControllerIntegrationTest {
     @Test
     void confirm_withValidToken_returns200() throws Exception {
         User user = crearUsuario("confirm-test-valido");
-        confirmationTokenRepository.save(ConfirmationToken.builder()
+        confirmationTokenRepository.save(AccountConfirmationToken.builder()
                 .token("token-valido")
                 .user(user)
                 .expiresAt(LocalDateTime.now().plusHours(1))
@@ -84,7 +84,7 @@ class ConfirmControllerIntegrationTest {
     @Test
     void confirm_withExpiredToken_returns400() throws Exception {
         User user = crearUsuario("confirm-test-expirado");
-        confirmationTokenRepository.save(ConfirmationToken.builder()
+        confirmationTokenRepository.save(AccountConfirmationToken.builder()
                 .token("token-expirado")
                 .user(user)
                 .expiresAt(LocalDateTime.now().minusHours(1))
@@ -100,7 +100,7 @@ class ConfirmControllerIntegrationTest {
     @Test
     void confirm_withAlreadyUsedToken_returns400() throws Exception {
         User user = crearUsuario("confirm-test-usado");
-        confirmationTokenRepository.save(ConfirmationToken.builder()
+        confirmationTokenRepository.save(AccountConfirmationToken.builder()
                 .token("token-ya-usado")
                 .user(user)
                 .expiresAt(LocalDateTime.now().plusHours(1))

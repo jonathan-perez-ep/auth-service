@@ -1,9 +1,9 @@
 package ep.example.auth.features.auth.register;
 
-import ep.example.auth.domain.ConfirmationToken;
+import ep.example.auth.domain.AccountConfirmationToken;
 import ep.example.auth.domain.User;
 import ep.example.auth.domain.UserRoleEnum;
-import ep.example.auth.infrastructure.ConfirmationTokenRepository;
+import ep.example.auth.infrastructure.AccountConfirmationTokenRepository;
 import ep.example.auth.infrastructure.UserRepository;
 import ep.example.auth.shared.email.EmailService;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class RegisterServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private AccountConfirmationTokenRepository confirmationTokenRepository;
 
     @Mock
     private EmailService emailService;
@@ -50,7 +50,7 @@ class RegisterServiceTest {
         registerService.register(request);
 
         verify(userRepository).save(any(User.class));
-        verify(confirmationTokenRepository).save(any(ConfirmationToken.class));
+        verify(confirmationTokenRepository).save(any(AccountConfirmationToken.class));
         verify(emailService).sendConfirmationEmail(eq("nuevo@email.com"), anyString());
     }
 
@@ -65,7 +65,7 @@ class RegisterServiceTest {
                 .hasMessage("El nombre de usuario ya está en uso");
 
         verify(userRepository, never()).save(any(User.class));
-        verify(confirmationTokenRepository, never()).save(any(ConfirmationToken.class));
+        verify(confirmationTokenRepository, never()).save(any(AccountConfirmationToken.class));
         verify(emailService, never()).sendConfirmationEmail(anyString(), anyString());
     }
 
@@ -81,7 +81,7 @@ class RegisterServiceTest {
                 .hasMessage("El correo electrónico ya está registrado");
 
         verify(userRepository, never()).save(any(User.class));
-        verify(confirmationTokenRepository, never()).save(any(ConfirmationToken.class));
+        verify(confirmationTokenRepository, never()).save(any(AccountConfirmationToken.class));
         verify(emailService, never()).sendConfirmationEmail(anyString(), anyString());
     }
 

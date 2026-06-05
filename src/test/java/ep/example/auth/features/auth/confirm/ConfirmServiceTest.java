@@ -1,8 +1,8 @@
 package ep.example.auth.features.auth.confirm;
 
-import ep.example.auth.domain.ConfirmationToken;
+import ep.example.auth.domain.AccountConfirmationToken;
 import ep.example.auth.domain.User;
-import ep.example.auth.infrastructure.ConfirmationTokenRepository;
+import ep.example.auth.infrastructure.AccountConfirmationTokenRepository;
 import ep.example.auth.infrastructure.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 class ConfirmServiceTest {
 
     @Mock
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private AccountConfirmationTokenRepository confirmationTokenRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -39,7 +39,7 @@ class ConfirmServiceTest {
                 .accountConfirmed(false)
                 .build();
 
-        ConfirmationToken token = ConfirmationToken.builder()
+        AccountConfirmationToken token = AccountConfirmationToken.builder()
                 .id(1L)
                 .token("token-valido")
                 .user(usuario)
@@ -79,7 +79,7 @@ class ConfirmServiceTest {
                 .password("password")
                 .build();
 
-        ConfirmationToken token = ConfirmationToken.builder()
+        AccountConfirmationToken token = AccountConfirmationToken.builder()
                 .id(2L)
                 .token("token-expirado")
                 .user(usuario)
@@ -105,7 +105,7 @@ class ConfirmServiceTest {
                 .password("password")
                 .build();
 
-        ConfirmationToken token = ConfirmationToken.builder()
+        AccountConfirmationToken token = AccountConfirmationToken.builder()
                 .id(3L)
                 .token("token-ya-usado")
                 .user(usuario)

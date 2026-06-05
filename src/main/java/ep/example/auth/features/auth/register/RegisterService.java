@@ -1,9 +1,9 @@
 package ep.example.auth.features.auth.register;
 
-import ep.example.auth.domain.ConfirmationToken;
+import ep.example.auth.domain.AccountConfirmationToken;
 import ep.example.auth.domain.User;
 import ep.example.auth.domain.UserRoleEnum;
-import ep.example.auth.infrastructure.ConfirmationTokenRepository;
+import ep.example.auth.infrastructure.AccountConfirmationTokenRepository;
 import ep.example.auth.infrastructure.UserRepository;
 import ep.example.auth.shared.email.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.UUID;
 public class RegisterService {
 
     private final UserRepository userRepository;
-    private final ConfirmationTokenRepository confirmationTokenRepository;
+    private final AccountConfirmationTokenRepository confirmationTokenRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
@@ -45,7 +45,7 @@ public class RegisterService {
 
         String tokenValue = UUID.randomUUID().toString();
 
-        ConfirmationToken confirmationToken = ConfirmationToken.builder()
+        AccountConfirmationToken confirmationToken = AccountConfirmationToken.builder()
                 .token(tokenValue)
                 .user(user)
                 .expiresAt(LocalDateTime.now().plusHours(24))

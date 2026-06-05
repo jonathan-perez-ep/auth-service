@@ -1,0 +1,1 @@
+ALTER TABLE confirmation_tokens RENAME TO account_confirmation_tokens;

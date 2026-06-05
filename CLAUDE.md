@@ -55,7 +55,7 @@ PostgreSQL local (`auth_db`). Las tablas las crea Flyway al arrancar desde `src/
 | `oauth2_authorization` | Historial de tokens emitidos |
 | `oauth2_authorization_consent` | Consentimientos aprobados por usuarios |
 | `users` | Usuarios del sistema |
-| `confirmation_tokens` | Tokens para confirmación de cuenta |
+| `account_confirmation_tokens` | Tokens para confirmación de cuenta de registro |
 | `flyway_schema_history` | Historial de migraciones aplicadas |
 
 Al arrancar se inserta automáticamente el cliente `demo-client` si no existe.

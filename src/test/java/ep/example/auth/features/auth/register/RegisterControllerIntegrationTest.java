@@ -1,6 +1,6 @@
 package ep.example.auth.features.auth.register;
 
-import ep.example.auth.infrastructure.ConfirmationTokenRepository;
+import ep.example.auth.infrastructure.AccountConfirmationTokenRepository;
 import ep.example.auth.infrastructure.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class RegisterControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private AccountConfirmationTokenRepository confirmationTokenRepository;
 
     // MockMvc crea transacciones propias que se commitean antes del rollback del test.
     // Por eso se limpia manualmente: primero tokens (FK), luego usuarios.
