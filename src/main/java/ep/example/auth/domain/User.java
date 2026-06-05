@@ -30,4 +30,11 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private UserRoleEnum role = UserRoleEnum.USER;
+
+    @Column(unique = true)
+    private String email;
+
+    @Column(name = "account_confirmed", nullable = false)
+    @Builder.Default
+    private boolean accountConfirmed = false;
 }
