@@ -20,6 +20,7 @@ public class SecurityConfig {
     @Order(2)
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/auth/**"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/confirm").permitAll()
                         .anyRequest().authenticated()
