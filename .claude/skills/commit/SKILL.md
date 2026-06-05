@@ -1,5 +1,5 @@
 ---
-description: Genera el mensaje de commit en español siguiendo las convenciones del proyecto, muestra una propuesta y ejecuta el commit tras confirmación del usuario.
+description: Genera el mensaje de commit en español siguiendo las convenciones del proyecto, muestra una propuesta, ejecuta el commit y opcionalmente hace push tras confirmación del usuario.
 ---
 
 ## 1. Verifica que haya cambios staged
@@ -81,3 +81,14 @@ git commit -m "tipo: descripción" -m "Cuerpo detallado aquí."
 Nunca uses `--no-verify`.
 
 Confirma el resultado mostrando el hash y el mensaje del commit creado.
+
+## 7. Pregunta si hacer push
+
+Después de confirmar el commit, detecta la rama actual con `git branch --show-current` y pregunta:
+
+```
+¿Hacemos push a origin/{rama-actual}?
+```
+
+Si el usuario confirma, ejecuta `git push origin {rama-actual}`. Muestra el resultado.
+Si el usuario dice que no, termina sin hacer nada más.
