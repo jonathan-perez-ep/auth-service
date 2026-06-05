@@ -150,4 +150,5 @@ Usuario de prueba disponible en `auth_db`: `user` / `password` (creado por `Data
 
 - Las llaves RSA se generan en memoria al arrancar — los tokens emitidos se invalidan al reiniciar. En producción deben persistirse.
 - Flyway no tiene auto-configuración en Spring Boot 4.x — ver `FlywayConfig.java` y el `@DependsOn("flyway")` en `AuthorizationServerConfig`.
-- Sin Docker aún — próxima fase.
+- Docker: `Dockerfile` (multi-stage build) + `docker-compose.yml` (solo PostgreSQL para devs sin instalación local). El backend se corre desde VS Code contra el postgres local o el containerizado.
+- Para levantar solo postgres: `docker compose up -d`
