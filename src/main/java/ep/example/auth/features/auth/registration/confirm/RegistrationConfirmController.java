@@ -16,11 +16,7 @@ public class RegistrationConfirmController {
 
     @GetMapping("/register/confirm")
     public ResponseEntity<String> confirm(@RequestParam String token) {
-        try {
-            registrationConfirmService.confirmAccount(token);
-            return ResponseEntity.ok("Cuenta confirmada exitosamente.");
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+        registrationConfirmService.confirmAccount(token);
+        return ResponseEntity.ok("Cuenta confirmada exitosamente.");
     }
 }

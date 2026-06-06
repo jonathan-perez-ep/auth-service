@@ -17,11 +17,7 @@ public class PasswordRecoveryConfirmController {
 
     @PostMapping("/password-recovery/confirm")
     public ResponseEntity<String> confirmReset(@RequestBody @Valid PasswordRecoveryConfirmRequest request) {
-        try {
-            passwordRecoveryConfirmService.confirmReset(request);
-            return ResponseEntity.ok("Contraseña actualizada exitosamente.");
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+        passwordRecoveryConfirmService.confirmReset(request);
+        return ResponseEntity.ok("Contraseña actualizada exitosamente.");
     }
 }

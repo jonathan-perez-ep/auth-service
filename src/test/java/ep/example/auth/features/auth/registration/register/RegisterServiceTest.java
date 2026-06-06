@@ -6,6 +6,7 @@ import ep.example.auth.domain.UserRoleEnum;
 import ep.example.auth.infrastructure.AccountConfirmationTokenRepository;
 import ep.example.auth.infrastructure.UserRepository;
 import ep.example.auth.shared.email.EmailService;
+import ep.example.auth.shared.exception.ConflictException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -55,13 +56,13 @@ class RegisterServiceTest {
     }
 
     @Test
-    void register_withExistingUsername_throwsIllegalArgumentException() {
+    void register_withExistingUsername_throwsConflictException() {
         RegisterRequest request = new RegisterRequest("usuarioExistente", "otro@email.com", "password123");
 
         when(userRepository.existsByUsername("usuarioExistente")).thenReturn(true);
 
         assertThatThrownBy(() -> registerService.register(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessage("El nombre de usuario ya está en uso");
 
         verify(userRepository, never()).save(any(User.class));
@@ -70,14 +71,14 @@ class RegisterServiceTest {
     }
 
     @Test
-    void register_withExistingEmail_throwsIllegalArgumentException() {
+    void register_withExistingEmail_throwsConflictException() {
         RegisterRequest request = new RegisterRequest("otroUsuario", "emailExistente@email.com", "password123");
 
         when(userRepository.existsByUsername("otroUsuario")).thenReturn(false);
         when(userRepository.existsByEmail("emailExistente@email.com")).thenReturn(true);
 
         assertThatThrownBy(() -> registerService.register(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessage("El correo electrónico ya está registrado");
 
         verify(userRepository, never()).save(any(User.class));

@@ -17,11 +17,7 @@ public class RegisterController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
-        try {
-            registerService.register(request);
-            return ResponseEntity.status(201).body("Usuario registrado. Revisa tu email para confirmar tu cuenta.");
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(409).body(ex.getMessage());
-        }
+        registerService.register(request);
+        return ResponseEntity.status(201).body("Usuario registrado. Revisa tu email para confirmar tu cuenta.");
     }
 }
