@@ -22,7 +22,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/auth/**"))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/confirm").permitAll()
+                        .requestMatchers("/auth/register", "/auth/register/confirm", "/auth/password-recovery", "/auth/password-recovery/confirm").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(Customizer.withDefaults());

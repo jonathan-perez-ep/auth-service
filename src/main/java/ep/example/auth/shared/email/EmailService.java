@@ -20,8 +20,24 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    public void sendPasswordResetEmail(String toEmail, String token) {
+        String resetLink = issuerUri + "/auth/password-recovery/confirm?token=" + token;
+
+        String body = "Haz clic en el siguiente enlace para restablecer tu contraseña:\n\n"
+                + resetLink
+                + "\n\nEste enlace expira en 1 hora.\n\nSi no solicitaste este cambio, ignora este mensaje.";
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(mailFrom);
+        message.setTo(toEmail);
+        message.setSubject("Restablece tu contraseña");
+        message.setText(body);
+
+        mailSender.send(message);
+    }
+
     public void sendConfirmationEmail(String toEmail, String token) {
-        String confirmationLink = issuerUri + "/auth/confirm?token=" + token;
+        String confirmationLink = issuerUri + "/auth/register/confirm?token=" + token;
 
         String body = "Haz clic en el siguiente enlace para confirmar tu cuenta:\n\n"
                 + confirmationLink
