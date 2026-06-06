@@ -1,4 +1,4 @@
-package ep.example.auth.features.auth.confirm;
+package ep.example.auth.features.auth.registration.confirm;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-public class ConfirmController {
+public class RegistrationConfirmController {
 
-    private final ConfirmService confirmService;
+    private final RegistrationConfirmService registrationConfirmService;
 
-    @GetMapping("/confirm")
+    @GetMapping("/register/confirm")
     public ResponseEntity<String> confirm(@RequestParam String token) {
         try {
-            confirmService.confirmAccount(token);
+            registrationConfirmService.confirmAccount(token);
             return ResponseEntity.ok("Cuenta confirmada exitosamente.");
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());

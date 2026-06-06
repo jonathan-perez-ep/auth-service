@@ -1,4 +1,4 @@
-package ep.example.auth.features.auth.confirm;
+package ep.example.auth.features.auth.registration.confirm;
 
 import ep.example.auth.domain.AccountConfirmationToken;
 import ep.example.auth.domain.User;
@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class ConfirmControllerIntegrationTest {
+class RegistrationConfirmControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -67,7 +67,7 @@ class ConfirmControllerIntegrationTest {
                 .confirmedAt(null)
                 .build());
 
-        mockMvc.perform(get("/auth/confirm")
+        mockMvc.perform(get("/auth/register/confirm")
                         .param("token", "token-valido"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Cuenta confirmada exitosamente."));
@@ -75,7 +75,7 @@ class ConfirmControllerIntegrationTest {
 
     @Test
     void confirm_withInvalidToken_returns400() throws Exception {
-        mockMvc.perform(get("/auth/confirm")
+        mockMvc.perform(get("/auth/register/confirm")
                         .param("token", "token-inexistente"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Token inválido"));
@@ -91,7 +91,7 @@ class ConfirmControllerIntegrationTest {
                 .confirmedAt(null)
                 .build());
 
-        mockMvc.perform(get("/auth/confirm")
+        mockMvc.perform(get("/auth/register/confirm")
                         .param("token", "token-expirado"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Token expirado"));
@@ -107,7 +107,7 @@ class ConfirmControllerIntegrationTest {
                 .confirmedAt(LocalDateTime.now().minusMinutes(10))
                 .build());
 
-        mockMvc.perform(get("/auth/confirm")
+        mockMvc.perform(get("/auth/register/confirm")
                         .param("token", "token-ya-usado"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Token ya utilizado"));

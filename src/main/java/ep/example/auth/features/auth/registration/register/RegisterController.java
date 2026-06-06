@@ -1,4 +1,4 @@
-package ep.example.auth.features.auth.register;
+package ep.example.auth.features.auth.registration.register;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

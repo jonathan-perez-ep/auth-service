@@ -1,4 +1,4 @@
-package ep.example.auth.features.auth.confirm;
+package ep.example.auth.features.auth.registration.confirm;
 
 import ep.example.auth.domain.AccountConfirmationToken;
 import ep.example.auth.domain.User;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class ConfirmService {
+public class RegistrationConfirmService {
 
     private final AccountConfirmationTokenRepository confirmationTokenRepository;
     private final UserRepository userRepository;

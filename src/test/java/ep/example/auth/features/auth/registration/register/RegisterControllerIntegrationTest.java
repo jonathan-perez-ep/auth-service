@@ -1,12 +1,14 @@
-package ep.example.auth.features.auth.register;
+package ep.example.auth.features.auth.registration.register;
 
 import ep.example.auth.infrastructure.AccountConfirmationTokenRepository;
 import ep.example.auth.infrastructure.UserRepository;
+import ep.example.auth.shared.email.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,8 +31,9 @@ class RegisterControllerIntegrationTest {
     @Autowired
     private AccountConfirmationTokenRepository confirmationTokenRepository;
 
-    // MockMvc crea transacciones propias que se commitean antes del rollback del test.
-    // Por eso se limpia manualmente: primero tokens (FK), luego usuarios.
+    @MockitoBean
+    private EmailService emailService;
+
     @BeforeEach
     void limpiar() {
         confirmationTokenRepository.deleteAll();

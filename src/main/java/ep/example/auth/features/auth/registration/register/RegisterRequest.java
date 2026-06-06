@@ -1,4 +1,4 @@
-package ep.example.auth.features.auth.register;
+package ep.example.auth.features.auth.registration.register;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,4 +1,4 @@
-package ep.example.auth.features.auth.confirm;
+package ep.example.auth.features.auth.registration.confirm;
 
 import ep.example.auth.domain.AccountConfirmationToken;
 import ep.example.auth.domain.User;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ConfirmServiceTest {
+class RegistrationConfirmServiceTest {
 
     @Mock
     private AccountConfirmationTokenRepository confirmationTokenRepository;
@@ -27,7 +27,7 @@ class ConfirmServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private ConfirmService confirmService;
+    private RegistrationConfirmService registrationConfirmService;
 
     @Test
     void confirmAccount_withValidToken_activatesAccount() {
@@ -49,7 +49,7 @@ class ConfirmServiceTest {
 
         when(confirmationTokenRepository.findByToken("token-valido")).thenReturn(Optional.of(token));
 
-        confirmService.confirmAccount("token-valido");
+        registrationConfirmService.confirmAccount("token-valido");
 
         assertThat(token.getConfirmedAt()).isNotNull();
         assertThat(usuario.isEnabled()).isTrue();
@@ -63,7 +63,7 @@ class ConfirmServiceTest {
     void confirmAccount_withInvalidToken_throwsIllegalArgumentException() {
         when(confirmationTokenRepository.findByToken("token-inexistente")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> confirmService.confirmAccount("token-inexistente"))
+        assertThatThrownBy(() -> registrationConfirmService.confirmAccount("token-inexistente"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Token inválido");
 
@@ -89,7 +89,7 @@ class ConfirmServiceTest {
 
         when(confirmationTokenRepository.findByToken("token-expirado")).thenReturn(Optional.of(token));
 
-        assertThatThrownBy(() -> confirmService.confirmAccount("token-expirado"))
+        assertThatThrownBy(() -> registrationConfirmService.confirmAccount("token-expirado"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Token expirado");
 
@@ -115,7 +115,7 @@ class ConfirmServiceTest {
 
         when(confirmationTokenRepository.findByToken("token-ya-usado")).thenReturn(Optional.of(token));
 
-        assertThatThrownBy(() -> confirmService.confirmAccount("token-ya-usado"))
+        assertThatThrownBy(() -> registrationConfirmService.confirmAccount("token-ya-usado"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Token ya utilizado");
 
