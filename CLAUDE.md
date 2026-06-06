@@ -119,9 +119,18 @@ src/main/java/ep/example/auth/
 │               ├── PasswordRecoveryConfirmController.java
 │               ├── PasswordRecoveryConfirmRequest.java
 │               └── PasswordRecoveryConfirmService.java
+├── features/                            # features de negocio (cont.)
+│   └── account/
+│       └── changepassword/             # POST /account/change-password
+│           ├── ChangePasswordController.java
+│           ├── ChangePasswordRequest.java
+│           └── ChangePasswordService.java
 └── shared/                              # utilidades compartidas entre features
-    └── email/
-        └── EmailService.java
+    ├── email/
+    │   └── EmailService.java
+    └── exception/
+        ├── GlobalExceptionHandler.java  # @RestControllerAdvice centralizado
+        └── ConflictException.java       # excepción para respuestas 409
 
 src/main/resources/
 ├── application.yaml
@@ -133,9 +142,11 @@ src/main/resources/
 
 ### Arquitectura
 
-- Arquitectura Vertical Slice: `features/auth/{feature}/{usecase}/`
+- Arquitectura Vertical Slice: `features/{module}/{feature}/{usecase}/`
+  - **Módulo** (todo minúsculas): `auth` (flujos de autenticación pública), `account` (gestión de cuenta autenticada)
   - **Feature** (todo minúsculas): `registration`, `passwordrecovery`
   - **Caso de uso** (todo minúsculas): `register`, `confirm`, `request`
+- Si el módulo tiene un único caso de uso, puede aplanarse: `features/account/changepassword/` (sin sub-paquete de feature)
 - Nombres de clases incluyen contexto de feature: `RegistrationConfirmController`, `PasswordRecoveryConfirmService`
 - Cada caso de uso contiene solo sus propias clases — sin interfaces para Services
 - DTOs de entrada nombrados `{Feature}Request`, de salida `{Feature}Response`
@@ -192,6 +203,7 @@ Skills propios en `.claude/skills/`. Invocar con `/nombre-skill`.
 | `/auth/register/confirm` | GET | Público | Confirmación de cuenta por token |
 | `/auth/password-recovery` | POST | Público | Solicitar reset de contraseña |
 | `/auth/password-recovery/confirm` | POST | Público | Aplicar nuevo password con token |
+| `/account/change-password` | POST | Autenticado | Cambiar contraseña del usuario autenticado |
 
 ## Notas importantes — Spring Security 7.x
 
@@ -208,8 +220,9 @@ http.oauth2AuthorizationServer(configurer -> configurer.oidc(...))
 // de filtros interceptan "any request". Siempre restringir la cadena del AS:
 http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
 
-// CSRF deshabilitado para endpoints REST /auth/**
-http.csrf(csrf -> csrf.ignoringRequestMatchers("/auth/**"))
+// CSRF deshabilitado para endpoints REST — aplica a /auth/** y /account/**
+// (APIs consumidas con Bearer token no necesitan CSRF; el login-form sí lo necesita)
+http.csrf(csrf -> csrf.ignoringRequestMatchers("/auth/**", "/account/**"))
 ```
 
 ## Tests
