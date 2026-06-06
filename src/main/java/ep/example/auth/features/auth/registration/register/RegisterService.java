@@ -26,6 +26,8 @@ public class RegisterService {
 
     @Transactional
     public void register(RegisterRequest request) {
+        // TODO(security): mensajes distintos por campo permiten enumerar cuentas existentes a escala.
+        // Mitigación recomendada: rate limiting por IP o CAPTCHA en el registro.
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new ConflictException("El nombre de usuario ya está en uso");
         }

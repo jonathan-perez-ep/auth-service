@@ -79,6 +79,8 @@ Copiar `.env.example` como `.env` y completar los valores. El `.env` nunca se su
 | `MAIL_HOST` | No (default: sandbox.smtp.mailtrap.io) | Host SMTP |
 | `MAIL_PORT` | No (default: 2525) | Puerto SMTP |
 | `MAIL_FROM` | No (default: noreply@auth-service.com) | Remitente de emails |
+| `DEMO_CLIENT_ID` | No (default: demo-client) | Client ID del cliente OAuth2 de desarrollo |
+| `DEMO_CLIENT_SECRET` | Sí | Secreto del cliente OAuth2 de desarrollo |
 
 ## Estructura del proyecto
 
@@ -240,6 +242,12 @@ BD de tests separada: `auth_db_test` (PostgreSQL local). Configuración en `src/
 Los tests usan `ddl-auto: none` — Flyway crea las tablas al iniciar el contexto de test.
 
 Usuario de prueba disponible en `auth_db`: `user` / `password` (creado por `DataInitializer` al arrancar).
+
+## Deuda de seguridad conocida
+
+| Severidad | Archivo | Descripción | Mitigación recomendada |
+|---|---|---|---|
+| Media | `RegisterService.java:31-35` | Mensajes de error distintos para username vs email permiten enumerar cuentas existentes desde el endpoint público `/auth/register` | Rate limiting por IP o CAPTCHA en el registro |
 
 ## Notas generales
 
