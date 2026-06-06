@@ -56,6 +56,7 @@ PostgreSQL local (`auth_db`). Las tablas las crea Flyway al arrancar desde `src/
 | `oauth2_authorization_consent` | Consentimientos aprobados por usuarios |
 | `users` | Usuarios del sistema |
 | `account_confirmation_tokens` | Tokens para confirmación de cuenta de registro |
+| `password_reset_tokens` | Tokens para recuperación de contraseña |
 | `flyway_schema_history` | Historial de migraciones aplicadas |
 
 Al arrancar se inserta automáticamente el cliente `demo-client` si no existe.
@@ -170,6 +171,8 @@ Skills propios en `.claude/skills/`. Invocar con `/nombre-skill`.
 |---|---|---|---|
 | `/auth/register` | POST | Público | Registro de nuevos usuarios |
 | `/auth/confirm` | GET | Público | Confirmación de cuenta por token |
+| `/auth/password-recovery` | POST | Público | Solicitar reset de contraseña |
+| `/auth/password-recovery/confirm` | POST | Público | Aplicar nuevo password con token |
 
 ## Notas importantes — Spring Security 7.x
 

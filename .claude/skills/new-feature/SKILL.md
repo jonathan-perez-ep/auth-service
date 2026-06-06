@@ -10,8 +10,9 @@ Si el usuario pasó un argumento, úsalo. Si no, pregúntale.
 
 El argumento debe estar en kebab-case: `password-reset`, `change-password`, `resend-confirmation`.
 
-Deriva de él:
-- **Nombre del paquete** (todo minúsculas, sin separadores): `passwordreset`, `changepassword`
+La estructura de paquetes sigue el patrón `features/auth/{feature}/{usecase}/`:
+- **Feature** (todo minúsculas, sin separadores): `registration`, `passwordrecovery`
+- **Caso de uso** (todo minúsculas, sin separadores): `register`, `confirm`, `request`
 - **Prefijo de clases** (PascalCase): `PasswordReset`, `ChangePassword`
 
 ## 2. Recopila contexto
@@ -31,12 +32,12 @@ Espera la respuesta antes de continuar.
 Lee estos archivos para respetar los patrones exactos del proyecto:
 
 - Si el endpoint es POST/PUT:
-  - `src/main/java/ep/example/auth/features/auth/register/RegisterController.java`
-  - `src/main/java/ep/example/auth/features/auth/register/RegisterService.java`
-  - `src/main/java/ep/example/auth/features/auth/register/RegisterRequest.java`
+  - `src/main/java/ep/example/auth/features/auth/registration/register/RegisterController.java`
+  - `src/main/java/ep/example/auth/features/auth/registration/register/RegisterService.java`
+  - `src/main/java/ep/example/auth/features/auth/registration/register/RegisterRequest.java`
 - Si el endpoint es GET:
-  - `src/main/java/ep/example/auth/features/auth/confirm/ConfirmController.java`
-  - `src/main/java/ep/example/auth/features/auth/confirm/ConfirmService.java`
+  - `src/main/java/ep/example/auth/features/auth/registration/confirm/ConfirmController.java`
+  - `src/main/java/ep/example/auth/features/auth/registration/confirm/ConfirmService.java`
 
 Lee también:
 - `src/main/java/ep/example/auth/config/SecurityConfig.java` — para saber dónde agregar el endpoint público
@@ -45,7 +46,7 @@ Lee también:
 
 ### Controller
 
-Ubicación: `src/main/java/ep/example/auth/features/auth/{paquete}/{Prefijo}Controller.java`
+Ubicación: `src/main/java/ep/example/auth/features/auth/{feature}/{usecase}/{Prefijo}Controller.java`
 
 Convenciones:
 - `@RestController`, `@RequestMapping("/auth")`, `@RequiredArgsConstructor`
@@ -55,7 +56,7 @@ Convenciones:
 
 ### Service
 
-Ubicación: `src/main/java/ep/example/auth/features/auth/{paquete}/{Prefijo}Service.java`
+Ubicación: `src/main/java/ep/example/auth/features/auth/{feature}/{usecase}/{Prefijo}Service.java`
 
 Convenciones:
 - `@Service`, `@RequiredArgsConstructor`
@@ -65,7 +66,7 @@ Convenciones:
 
 ### Request DTO (solo si POST o PUT)
 
-Ubicación: `src/main/java/ep/example/auth/features/auth/{paquete}/{Prefijo}Request.java`
+Ubicación: `src/main/java/ep/example/auth/features/auth/{feature}/{usecase}/{Prefijo}Request.java`
 
 Convenciones (igual que `RegisterRequest`):
 - `@Getter`, `@NoArgsConstructor`, `@AllArgsConstructor` de Lombok
