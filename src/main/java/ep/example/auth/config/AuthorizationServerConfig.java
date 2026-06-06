@@ -37,6 +37,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
@@ -48,6 +50,12 @@ import java.util.stream.Collectors;
 // Ventanilla OAuth2: emite tokens JWT, registra clientes y expone los endpoints /oauth2/*
 @Configuration
 public class AuthorizationServerConfig {
+
+    @Value("${app.demo-client.id}")
+    private String demoClientId;
+
+    @Value("${app.demo-client.secret}")
+    private String demoClientSecret;
 
     // Activa los endpoints OAuth2 (/oauth2/token, /oauth2/authorize, etc.).
     // Solo intercepta rutas propias del AS; el resto lo atiende defaultSecurityFilterChain.
@@ -81,10 +89,10 @@ public class AuthorizationServerConfig {
                                                           PasswordEncoder passwordEncoder) {
         JdbcRegisteredClientRepository repository = new JdbcRegisteredClientRepository(jdbcTemplate);
 
-        if (repository.findByClientId("demo-client") == null) {
+        if (repository.findByClientId(demoClientId) == null) {
             RegisteredClient demoClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                    .clientId("demo-client")
-                    .clientSecret(passwordEncoder.encode("secret"))
+                    .clientId(demoClientId)
+                    .clientSecret(passwordEncoder.encode(demoClientSecret))
                     .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                     .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                     .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)

@@ -41,6 +41,11 @@ spring:
 server:
   port: ${SERVER_PORT:9000}
 
+app:
+  demo-client:
+    id: ${DEMO_CLIENT_ID:demo-client}
+    secret: ${DEMO_CLIENT_SECRET}
+
 logging:
   level:
     "[org.springframework.security]": DEBUG
