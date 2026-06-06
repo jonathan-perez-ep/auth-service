@@ -94,19 +94,31 @@ src/main/java/ep/example/auth/
 ├── domain/                              # entidades JPA
 │   ├── User.java
 │   ├── UserRoleEnum.java               # roles: USER, ADMIN
-│   └── ConfirmationToken.java
+│   ├── AccountConfirmationToken.java
+│   └── PasswordResetToken.java
 ├── infrastructure/                      # repositorios JPA base (solo métodos estándar)
 │   ├── UserRepository.java
-│   └── ConfirmationTokenRepository.java
+│   ├── AccountConfirmationTokenRepository.java
+│   └── PasswordResetTokenRepository.java
 ├── features/                            # features de negocio
 │   └── auth/
-│       ├── register/                    # POST /auth/register
-│       │   ├── RegisterController.java
-│       │   ├── RegisterRequest.java
-│       │   └── RegisterService.java
-│       └── confirm/                     # GET /auth/confirm
-│           ├── ConfirmController.java
-│           └── ConfirmService.java
+│       ├── registration/               # feature: registro de usuarios
+│       │   ├── register/               # POST /auth/register
+│       │   │   ├── RegisterController.java
+│       │   │   ├── RegisterRequest.java
+│       │   │   └── RegisterService.java
+│       │   └── confirm/                # GET /auth/register/confirm
+│       │       ├── RegistrationConfirmController.java
+│       │       └── RegistrationConfirmService.java
+│       └── passwordrecovery/           # feature: recuperación de contraseña
+│           ├── request/                # POST /auth/password-recovery
+│           │   ├── PasswordRecoveryController.java
+│           │   ├── PasswordRecoveryRequest.java
+│           │   └── PasswordRecoveryService.java
+│           └── confirm/                # POST /auth/password-recovery/confirm
+│               ├── PasswordRecoveryConfirmController.java
+│               ├── PasswordRecoveryConfirmRequest.java
+│               └── PasswordRecoveryConfirmService.java
 └── shared/                              # utilidades compartidas entre features
     └── email/
         └── EmailService.java
@@ -121,9 +133,11 @@ src/main/resources/
 
 ### Arquitectura
 
-- Paquetes organizados por feature: `features/auth/{nombre-feature}/`
-- Nombres de features en infinitivo o sustantivo corto: `register`, `confirm`, `password-reset`
-- Cada feature contiene solo sus propias clases — sin interfaces para Services
+- Arquitectura Vertical Slice: `features/auth/{feature}/{usecase}/`
+  - **Feature** (todo minúsculas): `registration`, `passwordrecovery`
+  - **Caso de uso** (todo minúsculas): `register`, `confirm`, `request`
+- Nombres de clases incluyen contexto de feature: `RegistrationConfirmController`, `PasswordRecoveryConfirmService`
+- Cada caso de uso contiene solo sus propias clases — sin interfaces para Services
 - DTOs de entrada nombrados `{Feature}Request`, de salida `{Feature}Response`
 - Repositorios JPA en `infrastructure/` solo con métodos estándar de Spring Data
 - Utilidades compartidas entre features en `shared/`
@@ -141,6 +155,11 @@ src/main/resources/
 - Nombres de métodos en inglés: `methodName_withCondition_expectedBehavior()`
 - NO `@Transactional` en tests de integración — usar `@BeforeEach` para limpiar datos
 - Borrar primero tablas hijas (FK) y luego tablas padre en el cleanup
+- Mockear dependencias externas (email, etc.) con `@MockitoBean` — Spring Boot 4.x eliminó `@MockBean`
+  ```java
+  import org.springframework.test.context.bean.override.mockito.MockitoBean;
+  @MockitoBean EmailService emailService;
+  ```
 
 ## Skills disponibles
 
@@ -170,7 +189,7 @@ Skills propios en `.claude/skills/`. Invocar con `/nombre-skill`.
 | Endpoint | Método | Acceso | Descripción |
 |---|---|---|---|
 | `/auth/register` | POST | Público | Registro de nuevos usuarios |
-| `/auth/confirm` | GET | Público | Confirmación de cuenta por token |
+| `/auth/register/confirm` | GET | Público | Confirmación de cuenta por token |
 | `/auth/password-recovery` | POST | Público | Solicitar reset de contraseña |
 | `/auth/password-recovery/confirm` | POST | Público | Aplicar nuevo password con token |
 
