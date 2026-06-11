@@ -251,6 +251,7 @@ Usuario de prueba disponible en `auth_db`: `user` / `password` (creado por `Data
 
 ## Notas generales
 
+- CI configurado en `.github/workflows/ci.yml` — corre los tests en cada push a `main`. No bloquea pushes directos; para bloquear merges se necesitan branch protection rules (útil solo si hay equipo).
 - Las llaves RSA se generan en memoria al arrancar — los tokens emitidos se invalidan al reiniciar. En producción deben persistirse.
 - Flyway no tiene auto-configuración en Spring Boot 4.x — ver `FlywayConfig.java` y el `@DependsOn("flyway")` en `AuthorizationServerConfig`.
 - Docker: `Dockerfile` (multi-stage build) + `docker-compose.yml` (solo PostgreSQL para devs sin instalación local). El backend se corre desde VS Code contra el postgres local o el containerizado.
