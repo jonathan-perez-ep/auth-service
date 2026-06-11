@@ -184,6 +184,7 @@ Skills propios en `.claude/skills/`. Invocar con `/nombre-skill`.
 | `/new-feature` | Scaffold completo: Controller + Service + Request DTO + migración opcional |
 | `/new-migration` | Crea migración Flyway con timestamp correcto y estilo SQL del proyecto |
 | `/commit` | Genera mensaje de commit en español, propone y ejecuta con push opcional |
+| `/full-review` | Ejecuta `/security-review` y `/code-review` en secuencia con resumen consolidado |
 
 ## Endpoints OAuth2
 
