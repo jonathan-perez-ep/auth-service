@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +30,9 @@ class PasswordRecoveryServiceTest {
     private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Mock
+    private PasswordRecoveryRepository passwordRecoveryRepository;
+
+    @Mock
     private EmailService emailService;
 
     @InjectMocks
@@ -41,7 +43,6 @@ class PasswordRecoveryServiceTest {
         User user = User.builder().id(1L).username("usuario").email("usuario@test.com").build();
 
         when(userRepository.findByEmail("usuario@test.com")).thenReturn(Optional.of(user));
-        when(passwordResetTokenRepository.findAllByUser(user)).thenReturn(List.of());
 
         passwordRecoveryService.requestReset("usuario@test.com");
 
@@ -63,21 +64,11 @@ class PasswordRecoveryServiceTest {
     void requestReset_withExistingTokens_invalidatesPreviousTokens() {
         User user = User.builder().id(1L).username("usuario").email("usuario@test.com").build();
 
-        PasswordResetToken tokenAnterior1 = PasswordResetToken.builder()
-                .token("token-viejo-1").user(user)
-                .expiresAt(LocalDateTime.now().plusHours(1)).build();
-        PasswordResetToken tokenAnterior2 = PasswordResetToken.builder()
-                .token("token-viejo-2").user(user)
-                .expiresAt(LocalDateTime.now().plusHours(1)).build();
-
         when(userRepository.findByEmail("usuario@test.com")).thenReturn(Optional.of(user));
-        when(passwordResetTokenRepository.findAllByUser(user))
-                .thenReturn(List.of(tokenAnterior1, tokenAnterior2));
 
         passwordRecoveryService.requestReset("usuario@test.com");
 
-        assertThat(tokenAnterior1.getUsedAt()).isNotNull();
-        assertThat(tokenAnterior2.getUsedAt()).isNotNull();
+        verify(passwordRecoveryRepository).invalidatePendingByUserId(eq(1L), any(LocalDateTime.class));
     }
 
     @Test
@@ -85,7 +76,6 @@ class PasswordRecoveryServiceTest {
         User user = User.builder().id(1L).username("usuario").email("usuario@test.com").build();
 
         when(userRepository.findByEmail("usuario@test.com")).thenReturn(Optional.of(user));
-        when(passwordResetTokenRepository.findAllByUser(user)).thenReturn(List.of());
 
         passwordRecoveryService.requestReset("usuario@test.com");
 
