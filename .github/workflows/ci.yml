@@ -46,7 +46,7 @@ jobs:
           DB_PORT: 5432
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
-          DEMO_CLIENT_SECRET: ci-secret
+          DEMO_CLIENT_SECRET: secret
           MAIL_USERNAME: ci
           MAIL_PASSWORD: ci
         run: ./mvnw test -B
