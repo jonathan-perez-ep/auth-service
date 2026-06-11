@@ -17,6 +17,7 @@ public class PasswordRecoveryService {
 
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PasswordRecoveryRepository passwordRecoveryRepository;
     private final EmailService emailService;
 
     @Transactional
@@ -24,8 +25,7 @@ public class PasswordRecoveryService {
         // No revelamos si el email existe — previene enumeración de usuarios
         userRepository.findByEmail(email).ifPresent(user -> {
             // Invalidar tokens anteriores para este usuario
-            passwordResetTokenRepository.findAllByUser(user)
-                    .forEach(t -> t.setUsedAt(LocalDateTime.now()));
+            passwordRecoveryRepository.invalidatePendingByUserId(user.getId(), LocalDateTime.now());
 
             String tokenValue = UUID.randomUUID().toString();
 
