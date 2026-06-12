@@ -177,6 +177,8 @@ Skills propios en `.claude/skills/`. Invocar con `/nombre-skill`.
 | `/full-review` | Ejecuta `/security-review` y `/code-review` en secuencia con resumen consolidado |
 | `/context-sync` | Audita si `CLAUDE.md` está sincronizado con el estado actual del repo |
 
+Ejecutar `/context-sync` cuando: nuevo módulo o feature, nueva variable de entorno, nuevo endpoint, cambio de convención de arquitectura o testing.
+
 ## Endpoints OAuth2
 
 | Endpoint | Ruta |

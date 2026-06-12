@@ -82,7 +82,25 @@ Nunca uses `--no-verify`.
 
 Confirma el resultado mostrando el hash y el mensaje del commit creado.
 
-## 7. Pregunta si hacer push
+## 7. Verifica si CLAUDE.md necesita actualización
+
+Revisa los cambios del commit. Si incluyen alguno de estos:
+- Nuevo módulo o feature (`feat:`)
+- Nueva variable de entorno
+- Nuevo endpoint
+- Cambio de convención de arquitectura o testing
+
+Muestra este recordatorio:
+
+```
+Recordatorio: estos cambios pueden requerir actualizar CLAUDE.md.
+¿Ejecutamos /context-sync antes del push?
+```
+
+Si el usuario dice que sí, invoca el skill `context-sync`. Si dice que no, continúa.
+Si el commit es `fix:`, `test:`, `refactor:`, `docs:`, `chore:` o `style:`, omite este paso.
+
+## 8. Pregunta si hacer push
 
 Después de confirmar el commit, detecta la rama actual con `git branch --show-current` y pregunta:
 
