@@ -81,6 +81,8 @@ Copiar `.env.example` como `.env` y completar los valores. El `.env` nunca se su
 | `MAIL_FROM` | No (default: noreply@auth-service.com) | Remitente de emails |
 | `DEMO_CLIENT_ID` | No (default: demo-client) | Client ID del cliente OAuth2 de desarrollo |
 | `DEMO_CLIENT_SECRET` | Sí | Secreto del cliente OAuth2 de desarrollo |
+| `RSA_PRIVATE_KEY` | No (default: genera en memoria) | Clave privada RSA Base64 PKCS8 para firmar JWT. Sin valor, los tokens se invalidan al reiniciar. |
+| `RSA_PUBLIC_KEY` | No (default: genera en memoria) | Clave pública RSA Base64 X509 para verificar JWT. Generar con `jshell`. |
 
 ## Estructura del proyecto
 
@@ -103,25 +105,25 @@ src/main/java/ep/example/auth/
 │   ├── AccountConfirmationTokenRepository.java
 │   └── PasswordResetTokenRepository.java
 ├── features/                            # features de negocio
-│   └── auth/
-│       ├── registration/               # feature: registro de usuarios
-│       │   ├── register/               # POST /auth/register
-│       │   │   ├── RegisterController.java
-│       │   │   ├── RegisterRequest.java
-│       │   │   └── RegisterService.java
-│       │   └── confirm/                # GET /auth/register/confirm
-│       │       ├── RegistrationConfirmController.java
-│       │       └── RegistrationConfirmService.java
-│       └── passwordrecovery/           # feature: recuperación de contraseña
-│           ├── request/                # POST /auth/password-recovery
-│           │   ├── PasswordRecoveryController.java
-│           │   ├── PasswordRecoveryRequest.java
-│           │   └── PasswordRecoveryService.java
-│           └── confirm/                # POST /auth/password-recovery/confirm
-│               ├── PasswordRecoveryConfirmController.java
-│               ├── PasswordRecoveryConfirmRequest.java
-│               └── PasswordRecoveryConfirmService.java
-├── features/                            # features de negocio (cont.)
+│   ├── auth/
+│   │   ├── registration/               # feature: registro de usuarios
+│   │   │   ├── register/               # POST /auth/register
+│   │   │   │   ├── RegisterController.java
+│   │   │   │   ├── RegisterRequest.java
+│   │   │   │   └── RegisterService.java
+│   │   │   └── confirm/                # GET /auth/register/confirm
+│   │   │       ├── RegistrationConfirmController.java
+│   │   │       └── RegistrationConfirmService.java
+│   │   └── passwordrecovery/           # feature: recuperación de contraseña
+│   │       ├── request/                # POST /auth/password-recovery
+│   │       │   ├── PasswordRecoveryController.java
+│   │       │   ├── PasswordRecoveryRequest.java
+│   │       │   ├── PasswordRecoveryService.java
+│   │       │   └── PasswordRecoveryRepository.java  # repositorio JDBC para UPDATE bulk
+│   │       └── confirm/                # POST /auth/password-recovery/confirm
+│   │           ├── PasswordRecoveryConfirmController.java
+│   │           ├── PasswordRecoveryConfirmRequest.java
+│   │           └── PasswordRecoveryConfirmService.java
 │   └── account/
 │       └── changepassword/             # POST /account/change-password
 │           ├── ChangePasswordController.java
@@ -153,6 +155,7 @@ src/main/resources/
 - Cada caso de uso contiene solo sus propias clases — sin interfaces para Services
 - DTOs de entrada nombrados `{Feature}Request`, de salida `{Feature}Response`
 - Repositorios JPA en `infrastructure/` solo con métodos estándar de Spring Data
+- Cuando se necesita una operación bulk no soportada por Spring Data (ej. UPDATE masivo), crear un repositorio JDBC dentro del paquete del caso de uso — no en `infrastructure/` (ej. `PasswordRecoveryRepository`)
 - Utilidades compartidas entre features en `shared/`
 
 ### Commits
@@ -160,19 +163,6 @@ src/main/resources/
 - Idioma: siempre en español
 - Formato: `tipo: descripción` (minúsculas, sin punto final, máx. 70 caracteres)
 - Tipos: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `style`
-
-### Tests
-
-- Services → tests unitarios con Mockito (`{Class}Test.java`)
-- Controllers → tests de integración con MockMvc (`{Class}IntegrationTest.java`)
-- Nombres de métodos en inglés: `methodName_withCondition_expectedBehavior()`
-- NO `@Transactional` en tests de integración — usar `@BeforeEach` para limpiar datos
-- Borrar primero tablas hijas (FK) y luego tablas padre en el cleanup
-- Mockear dependencias externas (email, etc.) con `@MockitoBean` — Spring Boot 4.x eliminó `@MockBean`
-  ```java
-  import org.springframework.test.context.bean.override.mockito.MockitoBean;
-  @MockitoBean EmailService emailService;
-  ```
 
 ## Skills disponibles
 
@@ -185,6 +175,7 @@ Skills propios en `.claude/skills/`. Invocar con `/nombre-skill`.
 | `/new-migration` | Crea migración Flyway con timestamp correcto y estilo SQL del proyecto |
 | `/commit` | Genera mensaje de commit en español, propone y ejecuta con push opcional |
 | `/full-review` | Ejecuta `/security-review` y `/code-review` en secuencia con resumen consolidado |
+| `/context-sync` | Audita si `CLAUDE.md` está sincronizado con el estado actual del repo |
 
 ## Endpoints OAuth2
 
@@ -210,23 +201,10 @@ Skills propios en `.claude/skills/`. Invocar con `/nombre-skill`.
 
 ## Notas importantes — Spring Security 7.x
 
-En Spring Security 7.x los paquetes del Authorization Server cambiaron respecto a versiones anteriores:
-
-```java
-// Configurer (antes estaba en spring-security-oauth2-authorization-server)
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
-
-// Nuevo DSL en HttpSecurity
-http.oauth2AuthorizationServer(configurer -> configurer.oidc(...))
-
-// securityMatcher obligatorio — Spring Security 7 lanza excepción si dos cadenas
-// de filtros interceptan "any request". Siempre restringir la cadena del AS:
-http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
-
-// CSRF deshabilitado para endpoints REST — aplica a /auth/** y /account/**
-// (APIs consumidas con Bearer token no necesitan CSRF; el login-form sí lo necesita)
-http.csrf(csrf -> csrf.ignoringRequestMatchers("/auth/**", "/account/**"))
-```
+- El configurer del AS está en `org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer` (ya no en un artefacto separado).
+- Usar `http.oauth2AuthorizationServer(configurer -> ...)` para el DSL del AS.
+- `securityMatcher` obligatorio — Spring Security 7 lanza excepción si dos cadenas de filtros interceptan "any request". Siempre `http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())`.
+- CSRF deshabilitado para `/auth/**` y `/account/**` — APIs REST con Bearer token no lo necesitan; el login-form sí.
 
 ## Tests
 
@@ -244,6 +222,19 @@ Los tests usan `ddl-auto: none` — Flyway crea las tablas al iniciar el context
 
 Usuario de prueba disponible en `auth_db`: `user` / `password` (creado por `DataInitializer` al arrancar).
 
+### Convenciones
+
+- Services → tests unitarios con Mockito (`{Class}Test.java`)
+- Controllers → tests de integración con MockMvc (`{Class}IntegrationTest.java`)
+- Nombres de métodos en inglés: `methodName_withCondition_expectedBehavior()`
+- NO `@Transactional` en tests de integración — usar `@BeforeEach` para limpiar datos
+- Borrar primero tablas hijas (FK) y luego tablas padre en el cleanup
+- Mockear dependencias externas (email, etc.) con `@MockitoBean` — Spring Boot 4.x eliminó `@MockBean`
+  ```java
+  import org.springframework.test.context.bean.override.mockito.MockitoBean;
+  @MockitoBean EmailService emailService;
+  ```
+
 ## Deuda de seguridad conocida
 
 | Severidad | Archivo | Descripción | Mitigación recomendada |
@@ -253,7 +244,7 @@ Usuario de prueba disponible en `auth_db`: `user` / `password` (creado por `Data
 ## Notas generales
 
 - CI configurado en `.github/workflows/ci.yml` — corre los tests en cada push a `main`. No bloquea pushes directos; para bloquear merges se necesitan branch protection rules (útil solo si hay equipo).
-- Las llaves RSA se generan en memoria al arrancar — los tokens emitidos se invalidan al reiniciar. En producción deben persistirse.
+- Llaves RSA: si `RSA_PRIVATE_KEY` y `RSA_PUBLIC_KEY` están definidas en el entorno, se cargan y los tokens sobreviven reinicios. Si no, se generan en memoria al arrancar. Generar con `jshell` (ver `.env.example`).
 - Flyway no tiene auto-configuración en Spring Boot 4.x — ver `FlywayConfig.java` y el `@DependsOn("flyway")` en `AuthorizationServerConfig`.
 - Docker: `Dockerfile` (multi-stage build) + `docker-compose.yml` (solo PostgreSQL para devs sin instalación local). El backend se corre desde VS Code contra el postgres local o el containerizado.
 - Para levantar solo postgres: `docker compose up -d`
