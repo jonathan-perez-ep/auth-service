@@ -45,6 +45,9 @@ app:
   demo-client:
     id: ${DEMO_CLIENT_ID:demo-client}
     secret: ${DEMO_CLIENT_SECRET}
+  rsa:
+    private-key: ${RSA_PRIVATE_KEY:}
+    public-key: ${RSA_PUBLIC_KEY:}
 
 logging:
   level:

@@ -39,10 +39,14 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -56,6 +60,12 @@ public class AuthorizationServerConfig {
 
     @Value("${app.demo-client.secret}")
     private String demoClientSecret;
+
+    @Value("${app.rsa.private-key:}")
+    private String rsaPrivateKeyBase64;
+
+    @Value("${app.rsa.public-key:}")
+    private String rsaPublicKeyBase64;
 
     // Activa los endpoints OAuth2 (/oauth2/token, /oauth2/authorize, etc.).
     // Solo intercepta rutas propias del AS; el resto lo atiende defaultSecurityFilterChain.
@@ -151,14 +161,29 @@ public class AuthorizationServerConfig {
     }
 
     // Par de claves RSA: la privada firma los JWT, la pública permite verificarlos en /oauth2/jwks.
+    // Si las variables de entorno RSA_PRIVATE_KEY / RSA_PUBLIC_KEY están definidas, se cargan desde
+    // ahí (comportamiento persistente). Si no, se generan en memoria (solo para tests locales).
     @Bean
     JWKSource<SecurityContext> jwkSource() {
-        KeyPair keyPair = generateRsaKey();
+        KeyPair keyPair = rsaPrivateKeyBase64.isBlank() ? generateRsaKey() : loadRsaKey();
         RSAKey rsaKey = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
                 .privateKey((RSAPrivateKey) keyPair.getPrivate())
-                .keyID(UUID.randomUUID().toString())
+                .keyID("rsa-1")
                 .build();
         return new ImmutableJWKSet<>(new JWKSet(rsaKey));
+    }
+
+    private KeyPair loadRsaKey() {
+        try {
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            RSAPrivateKey privateKey = (RSAPrivateKey) kf.generatePrivate(
+                    new PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKeyBase64)));
+            RSAPublicKey publicKey = (RSAPublicKey) kf.generatePublic(
+                    new X509EncodedKeySpec(Base64.getDecoder().decode(rsaPublicKeyBase64)));
+            return new KeyPair(publicKey, privateKey);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Error cargando par de claves RSA desde variables de entorno", ex);
+        }
     }
 
     // URL base del servidor (issuer). Aparece en el campo "iss" de cada JWT emitido.
